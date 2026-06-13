@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   Settings as SettingsIcon, Database, FlaskConical, Check, AlertTriangle,
-  Server, ShieldCheck, Bell, Palette, User, Building2, ExternalLink,
+  Server, ShieldCheck, Bell, Palette, User, Home, ExternalLink,
 } from 'lucide-react'
 import { useData } from '../data/DataContext.jsx'
 import { Card, SectionHeader } from '../components/ui.jsx'
@@ -118,21 +118,21 @@ export default function Settings() {
         <Card className="p-5">
           <SectionHeader title="Your profile" icon={User} />
           <div className="flex items-center gap-3">
-            <img src="https://i.pravatar.cc/80?img=8" alt="" className="h-14 w-14 rounded-full object-cover ring-2 ring-white shadow" />
+            <img src="https://i.pravatar.cc/80?img=31" alt="" className="h-14 w-14 rounded-full object-cover ring-2 ring-white shadow" />
             <div>
-              <p className="font-semibold text-ink-900">Dr. Naomi Reyes</p>
-              <p className="text-sm text-ink-400">Care Director</p>
-              <p className="text-xs text-ink-400 mt-0.5">naomi.reyes@serenitycare.com</p>
+              <p className="font-semibold text-ink-900">Sarah Bennett</p>
+              <p className="text-sm text-ink-400">Daughter & primary caregiver</p>
+              <p className="text-xs text-ink-400 mt-0.5">sarah.bennett@email.com</p>
             </div>
           </div>
         </Card>
         <Card className="p-5">
-          <SectionHeader title="Facility" icon={Building2} />
+          <SectionHeader title="Care details" icon={Home} />
           <div className="space-y-2 text-sm">
-            <Row label="Name" value="Serenity Care Residence" />
-            <Row label="Location" value="San Mateo, CA" />
-            <Row label="Capacity" value="100 beds" />
-            <Row label="Established" value="2009" />
+            <Row label="Caring for" value="Robert (Dad)" />
+            <Row label="Living situation" value="At home · Portland, OR" />
+            <Row label="Care circle" value="6 people" />
+            <Row label="Caring since" value="2024" />
           </div>
         </Card>
       </div>
@@ -141,8 +141,8 @@ export default function Settings() {
       <Card className="p-5">
         <SectionHeader title="About" icon={Palette} />
         <p className="text-sm text-ink-500">
-          Serenity Care v1.0.0 — a comprehensive elderly care management platform. Built with React, Vite, Tailwind CSS
-          and Recharts. Optimized for mobile and desktop.
+          Serenity Care v3.0.1 — Family Caregiver edition. A warm, practical companion for coordinating care for an aging
+          parent at home. Built with React, Vite, Tailwind CSS and Recharts. Optimized for mobile and desktop.
         </p>
         <a href="https://github.com/bharatsbhat20" target="_blank" rel="noreferrer" className="btn-outline mt-3 text-sm">
           <ExternalLink size={15} /> View source

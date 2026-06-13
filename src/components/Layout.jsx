@@ -14,7 +14,7 @@ function Brand({ compact }) {
       {!compact && (
         <div className="leading-tight">
           <div className="font-display font-extrabold text-ink-900 text-[15px]">Serenity Care</div>
-          <div className="text-[11px] text-ink-400 font-medium">Care Management</div>
+          <div className="text-[11px] text-ink-400 font-medium">Family Care Companion</div>
         </div>
       )}
     </div>
@@ -127,7 +127,7 @@ export default function Layout({ children }) {
                 <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
                 <input
                   className="input pl-9"
-                  placeholder="Search residents, meds, schedule…"
+                  placeholder="Search meds, schedule, care circle…"
                   aria-label="Search"
                 />
               </div>
@@ -145,13 +145,13 @@ export default function Layout({ children }) {
               <div className="hidden sm:block">
                 <div className="flex items-center gap-2.5 pl-2">
                   <img
-                    src="https://i.pravatar.cc/80?img=8"
+                    src="https://i.pravatar.cc/80?img=31"
                     alt="You"
                     className="h-9 w-9 rounded-full object-cover ring-2 ring-white shadow-sm"
                   />
                   <div className="leading-tight pr-1">
-                    <div className="text-sm font-semibold text-ink-800">Dr. Naomi Reyes</div>
-                    <div className="text-[11px] text-ink-400">Care Director</div>
+                    <div className="text-sm font-semibold text-ink-800">Sarah Bennett</div>
+                    <div className="text-[11px] text-ink-400">Family caregiver</div>
                   </div>
                 </div>
               </div>

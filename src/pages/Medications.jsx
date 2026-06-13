@@ -37,12 +37,12 @@ export default function Medications() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <SectionHeader title="Medication Management" subtitle={`${meds.length} active prescriptions across ${residents.length} residents`} icon={Pill} />
+      <SectionHeader title="Dad’s Medications" subtitle={`${meds.length} prescriptions · keeping track so nothing is missed`} icon={Pill} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard icon={Pill} label="Active meds" value={meds.length} accent="brand" />
         <StatCard icon={CheckCircle2} label="Avg adherence" value={`${avgAdherence}%`} accent="emerald" trend={{ dir: 'up', value: '+2%' }} />
-        <StatCard icon={AlertTriangle} label="Critical meds" value={critical.length} accent="rose" sub="require monitoring" />
+        <StatCard icon={AlertTriangle} label="Must-not-miss" value={critical.length} accent="rose" sub="key daily meds" />
         <StatCard icon={Package} label="Low stock" value={lowStock.length} accent="amber" sub="need reorder" />
       </div>
 
@@ -115,7 +115,7 @@ export default function Medications() {
         <>
           <div className="relative">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} className="input pl-10" placeholder="Search medication or resident…" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} className="input pl-10" placeholder="Search medications…" />
           </div>
           <div className="space-y-2">
             {filteredMeds.map((m) => {
@@ -133,7 +133,7 @@ export default function Medications() {
                       <p className="text-sm text-ink-400 mt-0.5">{m.purpose} · {m.frequency} · {m.prescriber}</p>
                       <div className="flex items-center gap-2 mt-1.5">
                         <Avatar src={r?.photo} name={r?.name} size={22} />
-                        <span className="text-xs text-ink-500">{r?.name} · {r?.room}</span>
+                        <span className="text-xs text-ink-500">{r?.name} · {r?.relationship}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-5 sm:gap-6">

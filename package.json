@@ -1,9 +1,9 @@
 {
   "name": "serenity-care",
   "private": true,
-  "version": "1.0.0",
+  "version": "3.0.1",
   "type": "module",
-  "description": "Serenity Care — a comprehensive elderly care management platform",
+  "description": "Serenity Care — a family caregiver companion for coordinating care for an aging parent at home",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

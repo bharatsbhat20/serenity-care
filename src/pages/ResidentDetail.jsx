@@ -35,7 +35,7 @@ export default function ResidentDetail() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <Link to="/residents" className="btn-ghost text-ink-500 -ml-2"><ArrowLeft size={18} /> All residents</Link>
+      <Link to="/residents" className="btn-ghost text-ink-500 -ml-2"><ArrowLeft size={18} /> Back to overview</Link>
 
       {/* Header card */}
       <Card className="p-5 sm:p-6">
@@ -49,7 +49,7 @@ export default function ResidentDetail() {
               </span>
             </div>
             <p className="text-ink-500 mt-1">
-              “{resident.preferredName}” · {resident.age} yrs · {resident.gender} · Room {resident.room}
+              “{resident.preferredName}” · {resident.age} yrs · {resident.relationship} · {resident.livingSituation}
             </p>
             <div className="flex flex-wrap gap-1.5 mt-3">
               {resident.tags.map((t) => (
@@ -57,7 +57,7 @@ export default function ResidentDetail() {
               ))}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-              <MiniStat label="Care level" value={resident.careLevel} />
+              <MiniStat label="Living situation" value={resident.careSetting} />
               <MiniStat label="Mobility" value={resident.mobility} />
               <MiniStat label="Blood type" value={resident.bloodType} />
               <MiniStat label="Physician" value={resident.primaryPhysician} />
@@ -144,7 +144,7 @@ export default function ResidentDetail() {
 
           <div className="space-y-5">
             <Card className="p-5">
-              <SectionHeader title="Emergency contacts" icon={Phone} />
+              <SectionHeader title="Who to call" icon={Phone} />
               <div className="space-y-3">
                 {resident.emergencyContacts.map((c) => (
                   <div key={c.phone} className="flex items-center gap-3">
@@ -307,8 +307,8 @@ export default function ResidentDetail() {
             <SectionHeader title="Care plan summary" icon={ClipboardList} />
             <p className="text-sm text-ink-600 leading-relaxed">{resident.carePlan}</p>
             <div className="mt-4 pt-4 border-t border-ink-100 space-y-2 text-sm">
-              <Row label="Admitted" value={new Date(resident.admitted).toLocaleDateString('en-US', { dateStyle: 'medium' })} />
-              <Row label="Care level" value={resident.careLevel} />
+              <Row label="Caring since" value={new Date(resident.caringSince).toLocaleDateString('en-US', { dateStyle: 'medium' })} />
+              <Row label="Living situation" value={resident.careSetting} />
               <Row label="Physician" value={resident.primaryPhysician} />
             </div>
           </Card>

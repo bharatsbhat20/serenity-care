@@ -4,7 +4,7 @@ import { useAsync, useData } from '../data/DataContext.jsx'
 import { Card, SectionHeader, Avatar, Spinner, StatCard, ProgressBar } from '../components/ui.jsx'
 import { cn, priorityStyles } from '../lib/utils.js'
 
-const categories = ['All', 'Chronic Care', 'Cardiac Care', 'Cognitive', 'Safety', 'Skilled Nursing', 'Admissions']
+const categories = ['All', 'Daily routine', 'Health', 'Wellbeing', 'Safety', 'Appointments']
 
 export default function Workflows() {
   const { service } = useData()
@@ -41,10 +41,10 @@ export default function Workflows() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <SectionHeader title="Care Workflows" subtitle="Standardized protocols & daily task pipelines" icon={ListChecks} />
+      <SectionHeader title="Dad’s Care Routines" subtitle="Simple checklists that keep his days steady" icon={ListChecks} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard icon={ListChecks} label="Active protocols" value={workflows.length} accent="brand" />
+        <StatCard icon={ListChecks} label="Routines" value={workflows.length} accent="brand" />
         <StatCard icon={Clock} label="Due today" value={dueToday} accent="amber" />
         <StatCard icon={CheckCircle2} label="Completed" value={completed} accent="emerald" />
         <StatCard icon={ListChecks} label="Avg completion" value={`${avgProgress}%`} accent="violet" />
@@ -129,7 +129,7 @@ function WorkflowCard({ workflow: w, resident, caregiver, onToggle }) {
       <div className="flex items-center justify-between mt-4 pt-3 border-t border-ink-100 text-xs text-ink-400">
         <span className="flex items-center gap-1.5">
           <Avatar src={caregiver?.photo} name={caregiver?.name} size={22} />
-          {caregiver?.name}
+          {caregiver?.isYou ? 'You' : caregiver?.name}
         </span>
         <span className="flex items-center gap-1"><Clock size={12} /> {w.frequency}</span>
       </div>

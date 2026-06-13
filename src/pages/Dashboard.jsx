@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import {
-  Users, HeartPulse, Pill, BellRing, CalendarClock, TrendingUp, Activity,
-  ArrowRight, ShieldCheck, ClipboardList, Sparkles,
+  HeartHandshake, Pill, BellRing, CalendarClock, Activity, ArrowRight,
+  ClipboardList, Sparkles, Users, MessageCircle, Phone, ListChecks,
 } from 'lucide-react'
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
-  RadialBarChart, RadialBar, PieChart, Pie, Cell,
+  RadialBarChart, RadialBar,
 } from 'recharts'
 import { useAsync } from '../data/DataContext.jsx'
 import { Card, StatCard, SectionHeader, Avatar, Spinner, ProgressBar } from '../components/ui.jsx'
@@ -17,25 +17,32 @@ function todayStr() {
 }
 
 export default function Dashboard() {
-  const { data: facility } = useAsync((s) => s.getFacility())
+  const { data: household } = useAsync((s) => s.getFacility())
   const { data: residents } = useAsync((s) => s.getResidents())
   const { data: caregivers } = useAsync((s) => s.getCaregivers())
   const { data: events } = useAsync((s) => s.getScheduleEvents())
   const { data: alerts } = useAsync((s) => s.getAlerts())
   const { data: workflows } = useAsync((s) => s.getWorkflows())
   const { data: vitals } = useAsync((s) => s.getVitals('r1'))
-  const { data: analytics } = useAsync((s) => s.getAnalytics())
+  const { data: feed } = useAsync((s) => s.getActivityFeed())
 
-  if (!facility || !residents || !events || !alerts || !workflows) return <Spinner label="Loading care dashboard…" />
+  if (!household || !residents || !events || !alerts || !workflows || !caregivers) return <Spinner label="Loading your dashboard…" />
 
+  const dad = residents[0]
   const today = new Date().toISOString().slice(0, 10)
   const todayEvents = events.filter((e) => e.date === today).sort((a, b) => a.start.localeCompare(b.start))
   const upcoming = todayEvents.filter((e) => e.status !== 'completed')
   const openAlerts = alerts.filter((a) => !a.acknowledged)
   const criticalCount = openAlerts.filter((a) => a.severity === 'critical').length
-  const residentById = Object.fromEntries(residents.map((r) => [r.id, r]))
+  const caregiverById = Object.fromEntries(caregivers.map((c) => [c.id, c]))
   const dueWorkflows = workflows.filter((w) => w.dueToday)
-  const avgAdherence = Math.round(residents.reduce((a, r) => a + r.adherence, 0) / residents.length)
+  const tasksComplete = dueWorkflows.length
+    ? Math.round(dueWorkflows.reduce((a, w) => a + w.progress, 0) / dueWorkflows.length)
+    : 0
+  const nextAppt = events
+    .filter((e) => e.type === 'appointment' && (e.date > today || (e.date === today && e.status !== 'completed')))
+    .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start))[0]
+  const s = statusStyles[dad.status]
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -48,48 +55,52 @@ export default function Dashboard() {
             <Sparkles size={15} /> {todayStr()}
           </p>
           <h1 className="font-display font-extrabold text-2xl sm:text-3xl mt-1">
-            {greeting()}, Dr. Reyes
+            {greeting()}, Sarah
           </h1>
           <p className="text-brand-50/90 mt-1.5 max-w-xl text-sm sm:text-base">
-            {facility.occupied} residents in your care · {facility.staffOnDuty} staff on duty ·{' '}
+            Here’s how Dad is doing today.{' '}
             {criticalCount > 0 ? (
-              <span className="font-semibold text-white">{criticalCount} critical alert{criticalCount > 1 ? 's' : ''} need attention</span>
+              <span className="font-semibold text-white">{criticalCount} thing{criticalCount > 1 ? 's' : ''} need{criticalCount > 1 ? '' : 's'} your attention</span>
             ) : (
-              <span>all residents stable</span>
-            )}
+              <span>everything looks on track.</span>
+            )}{' '}
+            You’re not doing this alone — {household.careCircleSize} people are in his care circle.
           </p>
           <div className="flex flex-wrap gap-2 mt-4">
             <Link to="/scheduler" className="btn bg-white text-brand-700 px-4 py-2.5 hover:bg-brand-50 font-semibold">
-              <CalendarClock size={17} /> View schedule
+              <CalendarClock size={17} /> Today’s schedule
             </Link>
             <Link to="/alerts" className="btn bg-white/15 text-white px-4 py-2.5 hover:bg-white/25 font-semibold backdrop-blur">
-              <BellRing size={17} /> {openAlerts.length} open alerts
+              <BellRing size={17} /> {openAlerts.length} reminders
             </Link>
+            <a href={`tel:${dad.emergencyContacts[2]?.phone}`} className="btn bg-white/15 text-white px-4 py-2.5 hover:bg-white/25 font-semibold backdrop-blur">
+              <Phone size={17} /> Call the doctor
+            </a>
           </div>
         </div>
       </div>
 
       {/* KPI grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard icon={Users} label="Residents" value={facility.occupied} sub={`of ${facility.capacity} capacity`} accent="brand" trend={{ dir: 'up', value: `${Math.round((facility.occupied / facility.capacity) * 100)}%` }} />
-        <StatCard icon={Pill} label="Med adherence" value={`${avgAdherence}%`} sub="across all residents" accent="emerald" trend={{ dir: 'up', value: '+2%' }} />
-        <StatCard icon={BellRing} label="Open alerts" value={openAlerts.length} sub={`${criticalCount} critical`} accent={criticalCount ? 'rose' : 'sky'} trend={{ dir: criticalCount ? 'down' : 'flat', value: criticalCount ? 'Action' : 'OK' }} />
-        <StatCard icon={ClipboardList} label="Care tasks due" value={dueWorkflows.length} sub="active workflows today" accent="violet" trend={{ dir: 'flat', value: 'Today' }} />
+        <StatCard icon={BellRing} label="Open reminders" value={openAlerts.length} sub={`${criticalCount} need attention`} accent={criticalCount ? 'rose' : 'sky'} trend={{ dir: criticalCount ? 'down' : 'flat', value: criticalCount ? 'Review' : 'OK' }} />
+        <StatCard icon={Pill} label="Med adherence" value={`${dad.adherence}%`} sub="this week" accent="emerald" trend={{ dir: 'up', value: '+2%' }} />
+        <StatCard icon={ClipboardList} label="Care tasks today" value={`${tasksComplete}%`} sub={`${dueWorkflows.length} routines`} accent="violet" trend={{ dir: 'flat', value: 'Today' }} />
+        <StatCard icon={Users} label="Care circle" value={household.careCircleSize} sub="people helping" accent="brand" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Today's schedule */}
         <Card className="lg:col-span-2 p-5">
           <SectionHeader
-            title="Today’s schedule"
-            subtitle={`${upcoming.length} upcoming · ${todayEvents.length - upcoming.length} completed`}
+            title="Dad’s day"
+            subtitle={`${upcoming.length} coming up · ${todayEvents.length - upcoming.length} done`}
             icon={CalendarClock}
-            action={<Link to="/scheduler" className="btn-ghost text-brand-600 text-sm">View all <ArrowRight size={15} /></Link>}
+            action={<Link to="/scheduler" className="btn-ghost text-brand-600 text-sm">Full schedule <ArrowRight size={15} /></Link>}
           />
           <div className="space-y-2 max-h-[420px] overflow-y-auto no-scrollbar pr-1">
-            {todayEvents.slice(0, 8).map((e) => {
+            {todayEvents.map((e) => {
               const meta = eventTypeMeta[e.type]
-              const r = residentById[e.residentId]
+              const who = caregiverById[e.caregiverId]
               const done = e.status === 'completed'
               return (
                 <div
@@ -106,10 +117,8 @@ export default function Dashboard() {
                   </div>
                   <span className="h-9 w-1 rounded-full shrink-0" style={{ background: meta.color }} />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className={cn('font-semibold text-sm text-ink-800 truncate', done && 'line-through')}>{e.title}</p>
-                    </div>
-                    <p className="text-xs text-ink-400 truncate">{r?.name} · {e.location}</p>
+                    <p className={cn('font-semibold text-sm text-ink-800 truncate', done && 'line-through')}>{e.title}</p>
+                    <p className="text-xs text-ink-400 truncate">{who?.isYou ? 'You' : who?.name} · {e.location}</p>
                   </div>
                   <span className="chip shrink-0" style={{ background: meta.bg, color: meta.color }}>
                     {meta.label}
@@ -123,59 +132,56 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        {/* Critical alerts + wellbeing */}
+        {/* Reminders + tasks radial */}
         <div className="space-y-5">
           <Card className="p-5">
-            <SectionHeader title="Priority alerts" icon={BellRing} />
+            <SectionHeader title="Needs your attention" icon={BellRing} />
             <div className="space-y-2">
               {openAlerts.slice(0, 4).map((a) => {
-                const s = severityStyles[a.severity]
-                const r = residentById[a.residentId]
+                const sv = severityStyles[a.severity]
                 return (
-                  <Link to="/alerts" key={a.id} className={cn('block rounded-xl border p-3 hover:shadow-soft transition-shadow', s.chip)}>
+                  <Link to="/alerts" key={a.id} className={cn('block rounded-xl border p-3 hover:shadow-soft transition-shadow', sv.chip)}>
                     <div className="flex items-start gap-2">
-                      <span className={cn('mt-1 h-2 w-2 rounded-full shrink-0', s.dot)} />
+                      <span className={cn('mt-1 h-2 w-2 rounded-full shrink-0', sv.dot)} />
                       <div className="min-w-0">
                         <p className="text-sm font-semibold truncate">{a.title}</p>
-                        <p className="text-xs opacity-80 mt-0.5">{r?.preferredName} · {a.time}</p>
+                        <p className="text-xs opacity-80 mt-0.5">{a.time}</p>
                       </div>
                     </div>
                   </Link>
                 )
               })}
               {openAlerts.length === 0 && (
-                <p className="text-sm text-ink-400 py-4 text-center">No open alerts 🎉</p>
+                <p className="text-sm text-ink-400 py-4 text-center">All caught up 🎉</p>
               )}
             </div>
           </Card>
 
-          {analytics && (
-            <Card className="p-5">
-              <SectionHeader title="Facility occupancy" icon={TrendingUp} />
-              <div className="h-[150px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart innerRadius="65%" outerRadius="100%" data={[{ name: 'Occupancy', value: Math.round((facility.occupied / facility.capacity) * 100), fill: '#1f9f93' }]} startAngle={90} endAngle={-270}>
-                    <RadialBar background={{ fill: '#eceef2' }} dataKey="value" cornerRadius={20} />
-                    <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" className="fill-ink-900 font-display font-extrabold" fontSize="28">
-                      {Math.round((facility.occupied / facility.capacity) * 100)}%
-                    </text>
-                    <text x="50%" y="64%" textAnchor="middle" className="fill-ink-400" fontSize="11">occupied</text>
-                  </RadialBarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          )}
+          <Card className="p-5">
+            <SectionHeader title="Today’s care tasks" icon={ListChecks} />
+            <div className="h-[150px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart innerRadius="65%" outerRadius="100%" data={[{ name: 'Tasks', value: tasksComplete, fill: '#1f9f93' }]} startAngle={90} endAngle={-270}>
+                  <RadialBar background={{ fill: '#eceef2' }} dataKey="value" cornerRadius={20} />
+                  <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" className="fill-ink-900 font-display font-extrabold" fontSize="28">
+                    {tasksComplete}%
+                  </text>
+                  <text x="50%" y="64%" textAnchor="middle" className="fill-ink-400" fontSize="11">complete</text>
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
         </div>
       </div>
 
-      {/* Health trend + workflows */}
+      {/* Health trend + routines */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <Card className="lg:col-span-2 p-5">
           <SectionHeader
-            title="Vitals trend — featured resident"
-            subtitle="Eleanor Whitfield · last 14 days"
+            title="Dad’s health trend"
+            subtitle="Blood sugar & blood pressure · last 14 days"
             icon={Activity}
-            action={<Link to="/health" className="btn-ghost text-brand-600 text-sm">Health center <ArrowRight size={15} /></Link>}
+            action={<Link to="/health" className="btn-ghost text-brand-600 text-sm">Health <ArrowRight size={15} /></Link>}
           />
           {vitals && (
             <div className="h-[240px]">
@@ -195,8 +201,8 @@ export default function Dashboard() {
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#8290a8' }} axisLine={false} tickLine={false} interval={2} />
                   <YAxis tick={{ fontSize: 11, fill: '#8290a8' }} axisLine={false} tickLine={false} />
                   <Tooltip />
-                  <Area type="monotone" dataKey="systolic" name="Systolic BP" stroke="#fa3c11" strokeWidth={2.5} fill="url(#sys)" />
-                  <Area type="monotone" dataKey="glucose" name="Glucose" stroke="#1f9f93" strokeWidth={2.5} fill="url(#glu)" />
+                  <Area type="monotone" dataKey="systolic" name="Blood pressure (top)" stroke="#fa3c11" strokeWidth={2.5} fill="url(#sys)" />
+                  <Area type="monotone" dataKey="glucose" name="Blood sugar" stroke="#1f9f93" strokeWidth={2.5} fill="url(#glu)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -205,21 +211,21 @@ export default function Dashboard() {
 
         <Card className="p-5">
           <SectionHeader
-            title="Care workflows due"
+            title="Routines due today"
             icon={ClipboardList}
             action={<Link to="/workflows" className="btn-ghost text-brand-600 text-sm">All <ArrowRight size={15} /></Link>}
           />
           <div className="space-y-3">
             {dueWorkflows.map((w) => {
-              const r = residentById[w.residentId]
+              const who = caregiverById[w.assignedTo]
               return (
                 <Link to="/workflows" key={w.id} className="block rounded-xl border border-ink-100 p-3 hover:bg-ink-50 transition-colors">
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <p className="text-sm font-semibold text-ink-800 truncate">{w.name}</p>
                     <span className="text-xs font-bold text-brand-600">{w.progress}%</span>
                   </div>
-                  <ProgressBar value={w.progress} barClass={w.priority === 'critical' ? 'bg-rose-500' : 'bg-brand-500'} />
-                  <p className="text-xs text-ink-400 mt-1.5">{r?.preferredName} · {w.steps.filter((s) => s.done).length}/{w.steps.length} steps</p>
+                  <ProgressBar value={w.progress} barClass={w.progress === 100 ? 'bg-emerald-500' : 'bg-brand-500'} />
+                  <p className="text-xs text-ink-400 mt-1.5">{who?.isYou ? 'You' : who?.name} · {w.steps.filter((s) => s.done).length}/{w.steps.length} steps</p>
                 </Link>
               )
             })}
@@ -227,30 +233,60 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Resident snapshot row */}
-      <Card className="p-5">
-        <SectionHeader
-          title="Residents at a glance"
-          icon={ShieldCheck}
-          action={<Link to="/residents" className="btn-ghost text-brand-600 text-sm">All residents <ArrowRight size={15} /></Link>}
-        />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {residents.map((r) => {
-            const s = statusStyles[r.status]
-            return (
-              <Link to={`/residents/${r.id}`} key={r.id} className="rounded-2xl border border-ink-100 p-3 hover:shadow-soft hover:border-brand-200 transition-all text-center">
-                <Avatar src={r.photo} name={r.name} size={56} className="mx-auto" ring />
-                <p className="font-semibold text-sm text-ink-800 mt-2 truncate">{r.preferredName}</p>
-                <p className="text-[11px] text-ink-400 truncate">{r.room} · {r.age}y</p>
-                <span className={cn('chip mt-2 mx-auto', s.chip)}>
-                  <span className={cn('h-1.5 w-1.5 rounded-full', s.dot)} />
-                  {s.label}
-                </span>
-              </Link>
-            )
-          })}
-        </div>
-      </Card>
+      {/* Recent updates + care circle */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <Card className="lg:col-span-2 p-5">
+          <SectionHeader title="Recent updates" subtitle="From everyone helping with Dad" icon={MessageCircle} />
+          <div className="space-y-1">
+            {(feed || []).map((f) => {
+              const who = caregiverById[f.caregiverId]
+              const meta = eventTypeMeta[f.type] || eventTypeMeta.social
+              return (
+                <div key={f.id} className="flex items-start gap-3 py-2.5 border-b border-ink-50 last:border-0">
+                  <Avatar src={who?.photo} name={who?.name} size={36} ring />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-ink-700">
+                      <span className="font-semibold text-ink-900">{who?.isYou ? 'You' : who?.name}</span> {f.action}
+                    </p>
+                    <p className="text-xs text-ink-400 mt-0.5">{f.time}</p>
+                  </div>
+                  <span className="chip shrink-0 hidden sm:inline-flex" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <SectionHeader
+            title="Dad’s care circle"
+            icon={Users}
+            action={<Link to="/caregivers" className="btn-ghost text-brand-600 text-sm">View <ArrowRight size={15} /></Link>}
+          />
+          <Link to="/residents" className="flex items-center gap-3 rounded-2xl border border-ink-100 p-3 hover:border-brand-200 hover:shadow-soft transition-all mb-3">
+            <Avatar src={dad.photo} name={dad.name} size={48} ring />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-ink-900 truncate">{dad.name}</p>
+              <p className="text-xs text-ink-400">{dad.age} yrs · {dad.livingSituation}</p>
+            </div>
+            <span className={cn('chip', s.chip)}>
+              <span className={cn('h-1.5 w-1.5 rounded-full', s.dot)} /> {s.label}
+            </span>
+          </Link>
+          <div className="space-y-2">
+            {caregivers.filter((c) => !c.isYou).slice(0, 5).map((c) => (
+              <div key={c.id} className="flex items-center gap-3">
+                <Avatar src={c.photo} name={c.name} size={32} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-ink-800 truncate">{c.name}</p>
+                  <p className="text-[11px] text-ink-400 truncate">{c.role}</p>
+                </div>
+                <a href={`tel:${c.phone}`} className="btn-ghost p-2 text-ink-400"><Phone size={15} /></a>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
     </div>
   )
 }

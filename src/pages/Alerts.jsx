@@ -43,10 +43,10 @@ export default function Alerts() {
   return (
     <div className="space-y-5 animate-fade-in">
       <SectionHeader
-        title="Alerts & Notifications"
-        subtitle={`${openCount} unresolved · ${criticalCount} critical`}
+        title="Reminders & Alerts"
+        subtitle={`${openCount} to review · ${criticalCount} need attention`}
         icon={BellRing}
-        action={openCount > 0 && <button onClick={ackAll} className="btn-outline hidden sm:inline-flex"><CheckCheck size={16} /> Resolve all</button>}
+        action={openCount > 0 && <button onClick={ackAll} className="btn-outline hidden sm:inline-flex"><CheckCheck size={16} /> Mark all done</button>}
       />
 
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
@@ -97,7 +97,7 @@ export default function Alerts() {
                 {a.acknowledged ? (
                   <span className="chip bg-emerald-50 text-emerald-600 shrink-0"><Check size={13} /> Resolved</span>
                 ) : (
-                  <button onClick={() => ack(a.id)} className="btn-primary px-3 py-2 text-sm shrink-0"><Check size={15} /> Resolve</button>
+                  <button onClick={() => ack(a.id)} className="btn-primary px-3 py-2 text-sm shrink-0"><Check size={15} /> Got it</button>
                 )}
               </div>
             </Card>

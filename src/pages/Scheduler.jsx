@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, MapPin, User, Clock,
   Pill, Activity, Dumbbell, Stethoscope, Music, Utensils, Users, Check, Filter,
+  Home, ShoppingCart,
 } from 'lucide-react'
 import {
   format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay,
@@ -12,7 +13,7 @@ import { Card, SectionHeader, Avatar, Spinner } from '../components/ui.jsx'
 import { cn, formatTime12 } from '../lib/utils.js'
 import { eventTypeMeta } from '../data/mockData.js'
 
-const iconMap = { Pill, Activity, Dumbbell, Stethoscope, Music, Utensils, Users }
+const iconMap = { Pill, Activity, Dumbbell, Stethoscope, Music, Utensils, Users, Home, ShoppingCart }
 const VIEWS = ['Day', 'Week', 'Month']
 const HOUR_START = 7
 const HOUR_END = 21
@@ -380,8 +381,8 @@ function EventModal({ event, resident, caregiver, onClose }) {
             <div className="flex items-center gap-3">
               <span className="grid place-items-center h-9 w-9 rounded-lg bg-brand-50 text-brand-600"><User size={16} /></span>
               <div className="flex-1">
-                <p className="text-xs text-ink-400">Resident</p>
-                <p className="text-sm font-semibold text-ink-800">{resident.name} · {resident.room}</p>
+                <p className="text-xs text-ink-400">For</p>
+                <p className="text-sm font-semibold text-ink-800">{resident.name} · {resident.relationship}</p>
               </div>
               <Avatar src={resident.photo} name={resident.name} size={36} />
             </div>
@@ -390,7 +391,7 @@ function EventModal({ event, resident, caregiver, onClose }) {
             <div className="flex items-center gap-3">
               <Avatar src={caregiver.photo} name={caregiver.name} size={36} />
               <div className="flex-1">
-                <p className="text-xs text-ink-400">Assigned caregiver</p>
+                <p className="text-xs text-ink-400">Who’s helping</p>
                 <p className="text-sm font-semibold text-ink-800">{caregiver.name}</p>
               </div>
             </div>
